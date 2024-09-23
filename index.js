@@ -1,7 +1,7 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /** @type {ParamHash} */
@@ -17,7 +17,16 @@ if (param.Markdown) {
   var WINDOW_STYLE_HIDDEN = 0xC;
   var startInfo = GetObject('winmgmts:Win32_ProcessStartup').SpawnInstance_();
   startInfo.ShowWindow = WINDOW_STYLE_HIDDEN;
-  GetObject('winmgmts:Win32_Process').Create(format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" "{1}""', package.IconLink.Path, param.Markdown), null, startInfo);
+  /** @type {ErrorLogHash} */
+  var errorLog = include('src/errorLog.js');
+  var processService = GetObject('winmgmts:Win32_Process');
+  var createMethod = processService.Methods_('Create');
+  var inParam = createMethod.InParameters.SpawnInstance_();
+  inParam.CommandLine = format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" "{1}" 2> "{2}""', package.IconLink.Path, param.Markdown, errorLog.Path);
+  inParam.ProcessStartupInformation = startInfo;
+  waitForExit(processService.ExecMethod_(createMethod.Name, inParam).ProcessId);
+  errorLog.Read();
+  errorLog.Delete();
   WSH.Quit();
 }
 
@@ -31,6 +40,17 @@ if (param.Set || param.Unset) {
     setup.Unset();
     package.IconLink.Delete();
   }
+}
+
+/**
+ * Wait for the process exit.
+ * @param {number} processId is the process identifier.
+ */
+function waitForExit(processId) {
+  try {
+    var moniker = 'winmgmts:Win32_Process.Handle=' + processId;
+    while (GetObject(moniker).Name == 'cmd.exe') { }
+  } catch (error) { }
 }
 
 /**
