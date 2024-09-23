@@ -1,7 +1,7 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.1
+ * @version 0.0.1.2
  */
 
 /** @type {ParamHash} */
@@ -11,17 +11,16 @@ var package = include('src/package.js');
 
 /** The application execution. */
 if (param.Markdown) {
-  if (!package.IconLink.IsValid()) {
-    WSH.Quit();
-  }
   var WINDOW_STYLE_HIDDEN = 0;
   var WAIT_ON_RETURN = true;
   /** @type {ErrorLogHash} */
   var errorLog = include('src/errorLog.js');
-  if (WSH.CreateObject('WScript.Shell').Run(format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" "{1}" 2> "{2}""', package.IconLink.Path, param.Markdown, errorLog.Path), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN)) {
+  package.IconLink.Create(param.Markdown);
+  if (WSH.CreateObject('WScript.Shell').Run(format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" 2> "{1}""', package.IconLink.Path, errorLog.Path), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN)) {
     errorLog.Read();
     errorLog.Delete();
   }
+  package.IconLink.Delete();
   WSH.Quit();
 }
 
@@ -29,11 +28,9 @@ if (param.Markdown) {
 if (param.Set || param.Unset) {
   var setup = include('src/setup.js');
   if (param.Set) {
-    package.IconLink.Create();
     setup.Set(param.NoIcon, package.MenuIconPath);
   } else if (param.Unset) {
     setup.Unset();
-    package.IconLink.Delete();
   }
 }
 
