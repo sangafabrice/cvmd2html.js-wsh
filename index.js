@@ -1,7 +1,7 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /** @type {ParamHash} */
@@ -16,12 +16,11 @@ if (param.Markdown) {
   }
   var WINDOW_STYLE_HIDDEN = 0;
   var WAIT_ON_RETURN = true;
-  var wshell = new ActiveXObject('WScript.Shell');
-  if (wshell.Run(format('"{0}" "{1}"', package.IconLink.Path, param.Markdown), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN)) {
-    var OKONLY_BUTTON = 0;
-    var ERROR_ICON = 16;
-    var NO_TIMEOUT = 0;
-    wshell.Popup('An unhandled exception occured.', NO_TIMEOUT, 'Convert to HTML', OKONLY_BUTTON + ERROR_ICON)
+  /** @type {ErrorLogHash} */
+  var errorLog = include('src/errorLog.js');
+  if (WSH.CreateObject('WScript.Shell').Run(format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" "{1}" 2> "{2}""', package.IconLink.Path, param.Markdown, errorLog.Path), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN)) {
+    errorLog.Read();
+    errorLog.Delete();
   }
   WSH.Quit();
 }
