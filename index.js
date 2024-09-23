@@ -1,7 +1,7 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.1
+ * @version 0.0.1.2
  */
 
 /** @type {ParamHash} */
@@ -11,9 +11,6 @@ var package = include('src/package.js');
 
 /** The application execution. */
 if (param.Markdown) {
-  if (!package.IconLink.IsValid()) {
-    WSH.Quit();
-  }
   var WINDOW_STYLE_HIDDEN = 0xC;
   var startInfo = GetObject('winmgmts:Win32_ProcessStartup').SpawnInstance_();
   startInfo.ShowWindow = WINDOW_STYLE_HIDDEN;
@@ -22,9 +19,11 @@ if (param.Markdown) {
   var processService = GetObject('winmgmts:Win32_Process');
   var createMethod = processService.Methods_('Create');
   var inParam = createMethod.InParameters.SpawnInstance_();
-  inParam.CommandLine = format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" "{1}" 2> "{2}""', package.IconLink.Path, param.Markdown, errorLog.Path);
+  inParam.CommandLine = format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" 2> "{1}""', package.IconLink.Path, errorLog.Path);
   inParam.ProcessStartupInformation = startInfo;
+  package.IconLink.Create(param.Markdown);
   waitForExit(processService.ExecMethod_(createMethod.Name, inParam).ProcessId);
+  package.IconLink.Delete();
   errorLog.Read();
   errorLog.Delete();
   WSH.Quit();
@@ -34,11 +33,9 @@ if (param.Markdown) {
 if (param.Set || param.Unset) {
   var setup = include('src/setup.js');
   if (param.Set) {
-    package.IconLink.Create();
     setup.Set(param.NoIcon, package.MenuIconPath);
   } else if (param.Unset) {
     setup.Unset();
-    package.IconLink.Delete();
   }
 }
 
@@ -48,8 +45,8 @@ if (param.Set || param.Unset) {
  */
 function waitForExit(processId) {
   try {
-    var moniker = 'winmgmts:Win32_Process.Handle=' + processId;
-    while (GetObject(moniker).Name == 'cmd.exe') { }
+    var moniker = 'winmgmts:Win32_Process=' + processId;
+    while (GetObject(moniker)) { }
   } catch (error) { }
 }
 
