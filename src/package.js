@@ -1,7 +1,7 @@
 /**
  * @file returns information about the resource files used by the project.
  * It also provides a way to manage the custom icon link that can be installed and uninstalled.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /**
@@ -26,6 +26,12 @@
   };
   package.ResourcePath = fs.BuildPath(package.Root, 'rsc');
   package.PwshScriptPath = fs.BuildPath(package.ResourcePath, 'cvmd2html.ps1');
+  /**
+   * Store the partial "arguments" property string of the custom icon link.
+   * The command is partial because it does not include the markdown file path string.
+   * The markdown file path string will be input when calling the shortcut link.
+   */
+  var customIconLinkArguments = format('-ep Bypass -nop -w Hidden -f "{0}" -Markdown', package.PwshScriptPath);
   package.MenuIconPath = fs.BuildPath(package.ResourcePath, 'menu.ico');
   package.PwshExePath = (function() {
     var registry = GetObject('winmgmts:StdRegProv');
@@ -44,9 +50,9 @@
      */
     Create: function () {
       fs.CreateTextFile(this.Path).Close();
-      var link = WSH.CreateObject('Shell.Application').NameSpace(this.DirName).ParseName(this.Name).GetLink;
+      var link = this.GetLink();
       link.Path = package.PwshExePath;
-      link.Arguments = format('-ep Bypass -nop -w Hidden -f "{0}" -Markdown', package.PwshScriptPath);
+      link.Arguments = customIconLinkArguments;
       link.SetIconLocation(package.MenuIconPath, 0);
       link.Save();
     },
@@ -65,15 +71,16 @@
      * @returns {boolean} true if the link properties are as expected, false otherwise. 
      */
     IsValid: function () {
-      var linkItem;
-      var linkEnumerator = new Enumerator(GetObject('winmgmts:Win32_ShortcutFile').Instances_());
-      while (!linkEnumerator.atEnd()) {
-        if ((linkItem = linkEnumerator.item()).Name.toLowerCase() == this.Path.toLowerCase()) {
-          return linkItem.Target.toLowerCase() == package.PwshExePath.toLowerCase();
-        }
-        linkEnumerator.moveNext()
-      }
-      return false;
+      var linkItem = this.GetLink();
+      var targetCommand = '{0} {1}';
+      return format(targetCommand, linkItem.Path, linkItem.Arguments).toLowerCase() == format(targetCommand, package.PwshExePath, customIconLinkArguments).toLowerCase();
+    },
+    /**
+     * Get the link.
+     * @returns {object} the link object.
+     */
+    GetLink: function () {
+      return WSH.CreateObject('Shell.Application').NameSpace(this.DirName).ParseName(this.Name).GetLink;
     }
   }
   package.IconLink.Path = fs.BuildPath(package.IconLink.DirName, package.IconLink.Name);
