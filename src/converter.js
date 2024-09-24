@@ -1,6 +1,6 @@
 /**
  * @file returns the method to convert from markdown to html.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /**
@@ -52,26 +52,22 @@
     var Converter = (function () {
       // Build the HTML document that will load the showdown.js library.
       var document = new ActiveXObject('htmlFile');
-      with (document) {
-        open();
-        write(
-          '<!DOCTYPE html>' +
-          '<html>' +
-          '<head>' +
-            '<meta charset="UTF-8" />' +
-            '<meta http-equiv="X-UA-Compatible" content="IE=edge" />' +
-          '</head>' +
-          '<body>' +
-          '</body>' +
-          '</html>'
-        );
-        close();
-      }
-      // Add the script element that loads the library.
-      var scriptElement = document.createElement('script');
-      scriptElement.type = 'text/javascript';
-      scriptElement.text = GetContent(jsLibraryPath);
-      document.getElementsByTagName('head')[0].appendChild(scriptElement);
+      document.open();
+      document.write(
+        '<!DOCTYPE html>' +
+        '<html>' +
+        '<head>' +
+          '<meta charset="UTF-8" />' +
+          '<meta http-equiv="X-UA-Compatible" content="IE=edge" />' +
+          '<script type="text/javascript">' +
+            GetContent(jsLibraryPath) +
+          '</script>' +
+        '</head>' +
+        '<body>' +
+        '</body>' +
+        '</html>'
+      );
+      document.close();
       return new document.parentWindow.showdown.Converter();
     })();
 
