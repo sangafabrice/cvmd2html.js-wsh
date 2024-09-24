@@ -1,6 +1,6 @@
 /**
  * @file returns the method to convert from markdown to html.
- * @version 0.0.1.1
+ * @version 0.0.1.2
  */
 
 /**
@@ -45,11 +45,15 @@
       if (!MARKDOWN_REGEX.test(markdownPath)) {
         MessageBox.Show(format('"{0}" is not a markdown (.md) file.', markdownPath));
       }
-      SetHtmlContent(GetHtmlPath(markdownPath), Converter.makeHtml(GetContent(markdownPath)));
+      SetHtmlContent(GetHtmlPath(markdownPath), ConvertToHtml(GetContent(markdownPath)));
     }
 
-    // Get the function to convert a markdown content to html document.
-    var Converter = (function () {
+    /**
+     * Convert a markdown content to an html document.
+     * @param {string} mardownContent is the content to convert.
+     * @returns {string} the output html document content. 
+     */
+    function ConvertToHtml(markdownContent) {
       // Build the HTML document that will load the showdown.js library.
       var document = new ActiveXObject('htmlFile');
       document.open();
@@ -61,6 +65,9 @@
           '<meta http-equiv="X-UA-Compatible" content="IE=edge" />' +
           '<script type="text/javascript">' +
             GetContent(jsLibraryPath) +
+            'function convertMarkdown(markdownContent){' +
+              'return (new showdown.Converter()).makeHtml(markdownContent);' +
+            '}' +
           '</script>' +
         '</head>' +
         '<body>' +
@@ -68,8 +75,8 @@
         '</html>'
       );
       document.close();
-      return new document.parentWindow.showdown.Converter();
-    })();
+      return document.parentWindow.convertMarkdown(markdownContent);
+    }
 
     /**
      * This function returns the output path when it is unique without prompts or when
