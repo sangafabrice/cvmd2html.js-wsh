@@ -1,8 +1,10 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.2
+ * @version 0.0.1.3
  */
+
+RequestAdminPrivileges();
 
 /** @type {ParamHash} */
 var param = include('src/parameters.js');
@@ -22,10 +24,11 @@ if (param.Markdown) {
   inParam.CommandLine = format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" 2> "{1}""', package.IconLink.Path, errorLog.Path);
   inParam.ProcessStartupInformation = startInfo;
   package.IconLink.Create(param.Markdown);
-  waitForExit(processService.ExecMethod_(createMethod.Name, inParam).ProcessId);
+  if (waitForExit(processService.ExecMethod_(createMethod.Name, inParam).ProcessId)) {
+    errorLog.Read();
+    errorLog.Delete();
+  }
   package.IconLink.Delete();
-  errorLog.Read();
-  errorLog.Delete();
   WSH.Quit();
 }
 
@@ -42,12 +45,13 @@ if (param.Set || param.Unset) {
 /**
  * Wait for the process exit.
  * @param {number} processId is the process identifier.
+ * @return {number} the process exit code.
  */
 function waitForExit(processId) {
-  try {
-    var moniker = 'winmgmts:Win32_Process=' + processId;
-    while (GetObject(moniker)) { }
-  } catch (error) { }
+  // The process termination event query.
+  var wmiQuery = 'SELECT * FROM Win32_ProcessStopTrace WHERE ProcessName="cmd.exe" AND ProcessId=' + processId;
+  // Wait for the process to exit.
+  return GetObject('winmgmts:').ExecNotificationQuery(wmiQuery).NextEvent().ExitStatus;
 }
 
 /**
@@ -79,4 +83,27 @@ function include(libraryPath) {
     }
     return eval(content);
   } catch (error) { }
+}
+
+/**
+ * Request administrator privileges if standard user.
+ */
+function RequestAdminPrivileges() {
+  var registry = GetObject('winmgmts:StdRegProv');
+  var checkAccessMethod = registry.Methods_('CheckAccess');
+  var inParam = checkAccessMethod.InParameters.SpawnInstance_();
+  with (inParam) {
+    hDefKey = 0x80000003; // HKU
+    sSubKeyName = 'S-1-5-19\\Environment';
+  }
+  if (registry.ExecMethod_(checkAccessMethod.Name, inParam).bGranted) {
+    return;
+  }
+  var inputCommand = format('"{0}"', WSH.ScriptFullName);
+  for (var index = 0; index < WSH.Arguments.Count(); index++) {
+    inputCommand += format(' "{0}"', WSH.Arguments(index));
+  }
+  var WINDOW_STYLE_HIDDEN = 0;
+  WSH.CreateObject('Shell.Application').ShellExecute(WSH.FullName, inputCommand, null, 'runas', WINDOW_STYLE_HIDDEN);
+  WSH.Quit();
 }
