@@ -1,32 +1,34 @@
 /**
  * @file returns the methods for managing the shortcut menu option: install and uninstall.
- * @version 0.0.1.1
+ * @version 0.0.1.2
  */
 
 /** @module setup */
 (function() {
+  var HKCU = 0x80000001;
   var VERB_KEY = 'SOFTWARE\\Classes\\SystemFileAssociations\\.md\\shell\\cthtml';
-  var KEY_FORMAT = 'HKCU\\{0}\\';
+  var registry = GetObject('winmgmts:StdRegProv');
   var setup = {
-    /** Configure the shortcut menu in the registry. */
+    /**
+     * Configure the shortcut menu in the registry.
+     * @param {boolean} paramNoIcon specifies that the menu icon should not be set.
+     * @param {string} menuIconPath is the shortcut menu icon file path.
+     */
     Set: function (paramNoIcon, menuIconPath) {
-      VERB_KEY = format(KEY_FORMAT, VERB_KEY);
-      var COMMAND_KEY = VERB_KEY + 'command\\';
-      var VERBICON_VALUENAME = VERB_KEY + 'Icon';
-      var command = format('{0} //E:jscript "{1}" /Markdown:"%1"', WSH.FullName.replace(/\\cscript\.exe$/i, '\\wscript.exe'), WSH.ScriptFullName);
-      wshell.RegWrite(COMMAND_KEY, command);
-      wshell.RegWrite(VERB_KEY, 'Convert to &HTML');
+      var COMMAND_KEY = VERB_KEY + '\\command';
+      var command = format('{0} "{1}" /Markdown:"%1"', WSH.FullName.replace(/\\cscript\.exe$/i, '\\wscript.exe'), WSH.ScriptFullName);
+      registry.CreateKey(HKCU, COMMAND_KEY);
+      registry.SetStringValue(HKCU, COMMAND_KEY, null, command);
+      registry.SetStringValue(HKCU, VERB_KEY, null, 'Convert to &HTML');
+      var iconValueName = 'Icon';
       if (paramNoIcon) {
-        try {
-          wshell.RegDelete(VERBICON_VALUENAME);
-        } catch (error) { }
+        registry.DeleteValue(HKCU, VERB_KEY, iconValueName);
       } else {
-        wshell.RegWrite(VERBICON_VALUENAME, menuIconPath);
+        registry.SetStringValue(HKCU, VERB_KEY, iconValueName, menuIconPath);
       }
     },
     /** Remove the shortcut menu by removing the verb key and subkeys. */
     Unset: function () {
-      var HKCU = 0x80000001;
       var enumKeyMethod = registry.Methods_('EnumKey');
       var inParam = enumKeyMethod.InParameters.SpawnInstance_();
       inParam.hDefKey = HKCU;
@@ -41,9 +43,7 @@
             arguments.callee(format('{0}\\{1}', key, sNamesArray[index]));
           }
         }
-        try {
-          wshell.RegDelete(format(KEY_FORMAT, key));
-        } catch (error) { }
+        registry.DeleteKey(HKCU, key);
       })(VERB_KEY);
     }
   }

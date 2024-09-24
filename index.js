@@ -1,14 +1,13 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.3
+ * @version 0.0.1.7
  */
 
 // Imports.
 var fs = new ActiveXObject('Scripting.FileSystemObject');
 var wshell = new ActiveXObject('WScript.Shell');
 var typeLib = new ActiveXObject('Scriptlet.TypeLib');
-var registry = GetObject('winmgmts:StdRegProv');
 
 /** @type {ParamHash} */
 var param = include('src/parameters.js');
