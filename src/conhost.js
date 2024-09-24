@@ -1,6 +1,6 @@
 /**
  * @file returns the shortcut target script runner watcher.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /**
@@ -28,7 +28,7 @@
      * @param {string} markdownPath is the input markdown file path.
      */
     ConsoleHost.StartWith = function(markdownPath) {
-      WaitForExit(wshell.Exec(format('"{0}" -nop -ep Bypass -w Hidden -cwa "try { & $args[0] -MarkdownPath $args[1] } catch { Write-Error $_.Exception.Message }" "{1}" "{2}"', pwshExePath, pwshScriptPath, markdownPath)));
+      WaitForExit(wshell.Exec(format('"{0}" -nop -ep Bypass -w Hidden -cwa "try { Import-Module $args[0]; {3} -MarkdownPath $args[1] } catch { Write-Error $_.Exception.Message }" "{1}" "{2}"', pwshExePath, pwshScriptPath, markdownPath, fs.GetBaseName(pwshScriptPath))));
     }
 
     /**

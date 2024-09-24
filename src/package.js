@@ -1,7 +1,7 @@
 /**
  * @file returns information about the resource files used by the project.
  * It also provides a way to manage the custom icon link that can be installed and uninstalled.
- * @version 0.0.1.7
+ * @version 0.0.1.8
  */
 
 /**
@@ -24,7 +24,7 @@
     Root: fs.GetParentFolderName(WSH.ScriptFullName)
   };
   package.ResourcePath = fs.BuildPath(package.Root, 'rsc');
-  package.PwshScriptPath = fs.BuildPath(package.ResourcePath, 'cvmd2html.ps1');
+  package.PwshScriptPath = fs.BuildPath(package.Root, 'cvmd2html.psd1');
   package.MenuIconPath = fs.BuildPath(package.ResourcePath, 'menu.ico');
   // The HKLM registry subkey stores the PowerShell Core application path.
   package.PwshExePath = wshell.RegRead('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\pwsh.exe\\');
