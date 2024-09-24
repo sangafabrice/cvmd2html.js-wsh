@@ -1,7 +1,7 @@
 /**
  * @file returns information about the resource files used by the project.
  * It also provides a way to manage the custom icon link that can be installed and uninstalled.
- * @version 0.0.1.1
+ * @version 0.0.1.2
  */
 
 /**
@@ -19,8 +19,6 @@
 
 /** @module package */
 (function() {
-  var fs = new ActiveXObject('Scripting.FileSystemObject');
-  var wshell = new ActiveXObject('WScript.Shell');
   /** @type {PackageHash} */
   var package = {
     Root: fs.GetParentFolderName(WSH.ScriptFullName)
@@ -32,7 +30,7 @@
   package.PwshExePath = wshell.RegRead('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\pwsh.exe\\');
   package.IconLink = {
     DirName: wshell.ExpandEnvironmentStrings('%TEMP%'),
-    Name: WSH.CreateObject('Scriptlet.TypeLib').Guid.substr(1, 36).toLowerCase() + '.tmp.lnk',
+    Name: typeLib.Guid.substr(1, 36).toLowerCase() + '.tmp.lnk',
     /**
      * Create the custom icon link file.
      * @method @memberof package.IconLink

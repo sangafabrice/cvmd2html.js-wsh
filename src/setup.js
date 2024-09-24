@@ -1,11 +1,10 @@
 /**
  * @file returns the methods for managing the shortcut menu option: install and uninstall.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /** @module setup */
 (function() {
-  var wshell = new ActiveXObject('WScript.Shell');
   var VERB_KEY = 'SOFTWARE\\Classes\\SystemFileAssociations\\.md\\shell\\cthtml';
   var KEY_FORMAT = 'HKCU\\{0}\\';
   var setup = {
@@ -28,7 +27,6 @@
     /** Remove the shortcut menu by removing the verb key and subkeys. */
     Unset: function () {
       var HKCU = 0x80000001;
-      var registry = GetObject('winmgmts:StdRegProv');
       var enumKeyMethod = registry.Methods_('EnumKey');
       var inParam = enumKeyMethod.InParameters.SpawnInstance_();
       inParam.hDefKey = HKCU;

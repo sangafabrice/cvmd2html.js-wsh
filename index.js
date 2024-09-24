@@ -1,8 +1,14 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.2
+ * @version 0.0.1.3
  */
+
+// Imports.
+var fs = new ActiveXObject('Scripting.FileSystemObject');
+var wshell = new ActiveXObject('WScript.Shell');
+var typeLib = new ActiveXObject('Scriptlet.TypeLib');
+var registry = GetObject('winmgmts:StdRegProv');
 
 /** @type {ParamHash} */
 var param = include('src/parameters.js');
@@ -16,7 +22,7 @@ if (param.Markdown) {
   /** @type {ErrorLogHash} */
   var errorLog = include('src/errorLog.js');
   package.IconLink.Create(param.Markdown);
-  if (WSH.CreateObject('WScript.Shell').Run(format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" 2> "{1}""', package.IconLink.Path, errorLog.Path), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN)) {
+  if (wshell.Run(format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" 2> "{1}""', package.IconLink.Path, errorLog.Path), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN)) {
     errorLog.Read();
     errorLog.Delete();
   }
@@ -54,7 +60,6 @@ function format(formatStr, args) {
  * @returns {object} the object returned by the library.
  */
 function include(libraryPath) {
-  var fs = new ActiveXObject('Scripting.FileSystemObject');
   var FOR_READING = 1;
   try {
     with(fs.OpenTextFile(fs.BuildPath(fs.GetParentFolderName(WSH.ScriptFullName), libraryPath), FOR_READING)) {
