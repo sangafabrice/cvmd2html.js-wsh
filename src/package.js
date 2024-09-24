@@ -1,7 +1,7 @@
 /**
  * @file returns information about the resource files used by the project.
  * It also provides a way to manage the custom icon link that can be installed and uninstalled.
- * @version 0.0.1.2
+ * @version 0.0.1.3
  */
 
 /**
@@ -19,7 +19,6 @@
 
 /** @module package */
 (function() {
-  var fs = new ActiveXObject('Scripting.FileSystemObject');
   /** @type {PackageHash} */
   var package = {
     Root: fs.GetParentFolderName(WSH.ScriptFullName)
@@ -28,7 +27,6 @@
   package.PwshScriptPath = fs.BuildPath(package.ResourcePath, 'cvmd2html.ps1');
   package.MenuIconPath = fs.BuildPath(package.ResourcePath, 'menu.ico');
   package.PwshExePath = (function() {
-    var registry = GetObject('winmgmts:StdRegProv');
     var getStringValueMethod = registry.Methods_('GetStringValue');
     var inParam = getStringValueMethod.InParameters.SpawnInstance_();
     // The HKLM registry subkey stores the PowerShell Core application path.
@@ -36,8 +34,8 @@
     return registry.ExecMethod_(getStringValueMethod.Name, inParam).sValue;
   })();
   package.IconLink = {
-    DirName: WSH.CreateObject('WScript.Shell').ExpandEnvironmentStrings('%TEMP%'),
-    Name: WSH.CreateObject('Scriptlet.TypeLib').Guid.substr(1, 36).toLowerCase() + '.tmp.lnk',
+    DirName: wshell.ExpandEnvironmentStrings('%TEMP%'),
+    Name: typeLib.Guid.substr(1, 36).toLowerCase() + '.tmp.lnk',
     /**
      * Create the custom icon link file.
      * @method @memberof package.IconLink
@@ -65,7 +63,7 @@
      * @returns {object} the link object.
      */
     GetLink: function () {
-      return WSH.CreateObject('Shell.Application').NameSpace(this.DirName).ParseName(this.Name).GetLink;
+      return shell.NameSpace(this.DirName).ParseName(this.Name).GetLink;
     }
   }
   package.IconLink.Path = fs.BuildPath(package.IconLink.DirName, package.IconLink.Name);

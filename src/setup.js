@@ -1,13 +1,12 @@
 /**
  * @file returns the methods for managing the shortcut menu option: install and uninstall.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /** @module setup */
 (function() {
   var HKCU = 0x80000001;
   var VERB_KEY = 'SOFTWARE\\Classes\\SystemFileAssociations\\.md\\shell\\cthtml';
-  var registry = GetObject('winmgmts:StdRegProv');
   var setup = {
     /**
      * Configure the shortcut menu in the registry.

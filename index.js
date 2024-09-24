@@ -1,8 +1,16 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.5
+ * @version 0.0.1.6
  */
+
+// Imports.
+var fs = new ActiveXObject('Scripting.FileSystemObject');
+var wshell = new ActiveXObject('WScript.Shell');
+var typeLib = new ActiveXObject('Scriptlet.TypeLib');
+var shell = new ActiveXObject('Shell.Application');
+var wmiService = (new ActiveXObject('WbemScripting.SWbemLocator')).ConnectServer();
+var registry = wmiService.Get('StdRegProv');
 
 /** @type {ParamHash} */
 var param = include('src/parameters.js');
@@ -12,11 +20,11 @@ var package = include('src/package.js');
 /** The application execution. */
 if (param.Markdown) {
   var WINDOW_STYLE_HIDDEN = 0xC;
-  var startInfo = GetObject('winmgmts:Win32_ProcessStartup').SpawnInstance_();
+  var startInfo = wmiService.Get('Win32_ProcessStartup').SpawnInstance_();
   startInfo.ShowWindow = WINDOW_STYLE_HIDDEN;
   /** @type {ErrorLogHash} */
   var errorLog = include('src/errorLog.js');
-  var processService = GetObject('winmgmts:Win32_Process');
+  var processService = wmiService.Get('Win32_Process');
   var createMethod = processService.Methods_('Create');
   var inParam = createMethod.InParameters.SpawnInstance_();
   inParam.CommandLine = format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" 2> "{1}""', package.IconLink.Path, errorLog.Path);
@@ -49,7 +57,7 @@ function waitForChildExit(parentProcessId) {
   // Select the process whose parent is the intermediate process used for executing the link.
   var wmiQuery = 'SELECT * FROM __InstanceDeletionEvent WITHIN 0.1 WHERE TargetInstance ISA "Win32_Process" AND TargetInstance.Name="pwsh.exe" AND TargetInstance.ParentProcessId=' + parentProcessId;
   // Wait for the process to exit.
-  GetObject('winmgmts:').ExecNotificationQueryAsync(sink, wmiQuery);
+  wmiService.ExecNotificationQueryAsync(sink, wmiQuery);
   while (sink) {
     WSH.Sleep(1);
   }
@@ -70,7 +78,7 @@ function PwshProcess_OnCompleted(hResult, wbemObject, asyncContext) {
     var OKONLY_BUTTON = 0;
     var ERROR_ICON = 16;
     var NO_TIMEOUT = 0;
-    WSH.CreateObject('WScript.Shell').Popup('An unhandled exception occured.', NO_TIMEOUT, 'Convert to HTML', OKONLY_BUTTON + ERROR_ICON)
+    wshell.Popup('An unhandled exception occured.', NO_TIMEOUT, 'Convert to HTML', OKONLY_BUTTON + ERROR_ICON)
   }
   wbemObject = null;
   asyncContext = null;
@@ -97,7 +105,6 @@ function format(formatStr, args) {
  * @returns {object} the object returned by the library.
  */
 function include(libraryPath) {
-  var fs = new ActiveXObject('Scripting.FileSystemObject');
   var FOR_READING = 1;
   try {
     with(fs.OpenTextFile(fs.BuildPath(fs.GetParentFolderName(WSH.ScriptFullName), libraryPath), FOR_READING)) {

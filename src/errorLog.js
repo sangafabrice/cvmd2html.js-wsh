@@ -1,6 +1,6 @@
 /**
  * @file manages the error log file and content.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /**
@@ -10,11 +10,9 @@
 
 /** @module errorLog */
 (function() {
-  var fs = new ActiveXObject('Scripting.FileSystemObject');
-  var wshell = new ActiveXObject('WScript.Shell');
   /** @type {ErrorLogHash} */
   var errorLog = {
-    Path: fs.BuildPath(wshell.ExpandEnvironmentStrings('%TEMP%'), WSH.CreateObject('Scriptlet.TypeLib').Guid.substr(1, 36).toLowerCase() + '.tmp.log'),
+    Path: fs.BuildPath(wshell.ExpandEnvironmentStrings('%TEMP%'), typeLib.Guid.substr(1, 36).toLowerCase() + '.tmp.log'),
     /**
      * Display the content of the error log file in a message box if it is not empty.
      */
