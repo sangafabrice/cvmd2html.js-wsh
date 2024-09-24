@@ -1,6 +1,6 @@
 /**
  * @file returns the parsed parameters.
- * @version 0.0.1
+ * @version 0.0.1.2
  */
 
 /**
@@ -10,6 +10,7 @@
  * @property {boolean} Set installs the shortcut menu.
  * @property {boolean} NoIcon installs the shortcut menu without icon.
  * @property {boolean} Unset uninstalls the shortcut menu.
+ * @property {boolean} RunLink restarts the runtime with the custom icon.
  * @property {boolean} Help shows help.
  */
 
@@ -19,8 +20,14 @@
   var WshArguments = WSH.Arguments;
   var WshNamed = WshArguments.Named;
   var paramCount = WshArguments.Count();
+  var paramMarkdown = WshNamed('Markdown');
+  if (paramCount == 2 && WshNamed('RunLink') == undefined && WshNamed.Exists('RunLink') && paramMarkdown.length) {
+    return {
+      Markdown: paramMarkdown,
+      RunLink: true
+    }
+  }
   if (paramCount == 1) {
-    var paramMarkdown = WshNamed('Markdown');
     if (WshNamed.Exists('Markdown') && paramMarkdown != undefined && paramMarkdown.length) {
       return { Markdown: paramMarkdown };
     }

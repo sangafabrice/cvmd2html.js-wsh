@@ -1,7 +1,7 @@
 /**
  * @file returns information about the resource files used by the project.
  * It also provides a way to manage the custom icon link that can be installed and uninstalled.
- * @version 0.0.1.4
+ * @version 0.0.1.7
  */
 
 /**
@@ -30,7 +30,7 @@
   package.PwshExePath = wshell.RegRead('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\pwsh.exe\\');
   package.IconLink = {
     DirName: wshell.ExpandEnvironmentStrings('%TEMP%'),
-    Name: typeLib.Guid.substr(1, 36).toLowerCase() + '.tmp.lnk',
+    Name: WSH.CreateObject('Scriptlet.TypeLib').Guid.substr(1, 36).toLowerCase() + '.tmp.lnk',
     /**
      * Create the custom icon link file.
      * @method @memberof package.IconLink
@@ -38,8 +38,8 @@
      */
     Create: function (markdownPath) {
       var link = this.GetLink();
-      link.TargetPath = package.PwshExePath;
-      link.Arguments = format('-ep Bypass -nop -w Hidden -f "{0}" -Markdown "{1}"', package.PwshScriptPath, markdownPath);
+      link.TargetPath =  getDefaultCustomIconLinkTarget();
+      link.Arguments = format('"{0}" /Markdown:"{1}"', WSH.ScriptFullName, markdownPath);
       link.IconLocation = package.MenuIconPath;
       link.Save();
     },

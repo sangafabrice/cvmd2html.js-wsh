@@ -1,13 +1,12 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.7
+ * @version 0.0.1.8
  */
 
 // Imports.
 var fs = new ActiveXObject('Scripting.FileSystemObject');
 var wshell = new ActiveXObject('WScript.Shell');
-var typeLib = new ActiveXObject('Scriptlet.TypeLib');
 
 /** @type {ParamHash} */
 var param = include('src/parameters.js');
@@ -15,17 +14,17 @@ var param = include('src/parameters.js');
 var package = include('src/package.js');
 
 /** The application execution. */
-if (param.Markdown) {
+if (param.RunLink) {
   var WINDOW_STYLE_HIDDEN = 0;
   var WAIT_ON_RETURN = true;
-  /** @type {ErrorLogHash} */
-  var errorLog = include('src/errorLog.js');
   package.IconLink.Create(param.Markdown);
-  if (wshell.Run(format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" 2> "{1}""', package.IconLink.Path, errorLog.Path), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN)) {
-    errorLog.Read();
-    errorLog.Delete();
-  }
+  wshell.Run(format('"{0}"', package.IconLink.Path), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN)
   package.IconLink.Delete();
+  WSH.Quit();
+}
+
+if (param.Markdown) {
+  include('src/conhost.js')(package.PwshExePath, package.PwshScriptPath).StartWith(param.Markdown);
   WSH.Quit();
 }
 
@@ -37,6 +36,14 @@ if (param.Set || param.Unset) {
   } else if (param.Unset) {
     setup.Unset();
   }
+}
+
+/**
+ * Get the WSH runtime in GUI mode (wscript.exe).
+ * @returns {string} the WScript.Exe path.
+ */
+function getDefaultCustomIconLinkTarget() {
+  return fs.BuildPath(fs.GetParentFolderName(WSH.FullName), 'wscript.exe');
 }
 
 /**
