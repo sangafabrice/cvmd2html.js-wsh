@@ -1,7 +1,7 @@
 /**
  * @file returns information about the resource files used by the project.
  * It also provides a way to manage the custom icon link that can be installed and uninstalled.
- * @version 0.0.1.8
+ * @version 0.0.1.9
  */
 
 /**
@@ -9,8 +9,7 @@
  * @property {string} Root is the project root path.
  * @property {string} ResourcePath is the project resources directory path.
  * @property {string} MenuIconPath is the shortcut menu icon path.
- * @property {string} PwshExePath is the powershell core runtime path.
- * @property {string} PwshScriptPath is the shortcut target powershell script path.
+ * @property {string} JsLibraryPath is the showdown.js library path.
  * @property {object} IconLink represents an adapted link object.
  * @property {string} IconLink.DirName is the parent directory path of the custom icon link.
  * @property {string} IconLink.Name is the custom icon link file name.
@@ -24,10 +23,8 @@
     Root: fs.GetParentFolderName(WSH.ScriptFullName)
   };
   package.ResourcePath = fs.BuildPath(package.Root, 'rsc');
-  package.PwshScriptPath = fs.BuildPath(package.Root, 'cvmd2html.psd1');
+  package.JsLibraryPath = fs.BuildPath(package.ResourcePath, 'showdown.min.js');
   package.MenuIconPath = fs.BuildPath(package.ResourcePath, 'menu.ico');
-  // The HKLM registry subkey stores the PowerShell Core application path.
-  package.PwshExePath = wshell.RegRead('HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\pwsh.exe\\');
   package.IconLink = {
     DirName: wshell.ExpandEnvironmentStrings('%TEMP%'),
     Name: WSH.CreateObject('Scriptlet.TypeLib').Guid.substr(1, 36).toLowerCase() + '.tmp.lnk',

@@ -1,6 +1,6 @@
 /**
  * @file returns the markdown conversion message box.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /**
@@ -20,7 +20,7 @@
   /** @private @constant {number} */
   var OK_BUTTON = 0;
   /** @private @constant {number} */
-  var YES_POPUPRESULT = 6;
+  var OK_POPUPRESULT = 1;
   /** @private @constant {number} */
   var NO_POPUPRESULT = 7;
   /** @private @constant {number} */
@@ -53,10 +53,9 @@
     // The warning message box shows the alternative Yes or No buttons.
     messageType += messageType == ERROR_MESSAGE ? OK_BUTTON:YESNO_BUTTON;
     switch (wshell.Popup(message, NO_MESSAGE_TIMEOUT, MESSAGE_BOX_TITLE, messageType)) {
-      case YES_POPUPRESULT:
-        return 'Yes';
+      case OK_POPUPRESULT:
       case NO_POPUPRESULT:
-        return 'No';
+        WSH.Quit();
     }
   }
 
