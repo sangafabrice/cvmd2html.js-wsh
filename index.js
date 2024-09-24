@@ -1,7 +1,7 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.2
+ * @version 0.0.1.3
  */
 
 /** @type {ParamHash} */
@@ -22,7 +22,7 @@ if (param.Markdown) {
   inParam.CommandLine = format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" 2> "{1}""', package.IconLink.Path, errorLog.Path);
   inParam.ProcessStartupInformation = startInfo;
   package.IconLink.Create(param.Markdown);
-  waitForExit(processService.ExecMethod_(createMethod.Name, inParam).ProcessId);
+  waitForChildExit(processService.ExecMethod_(createMethod.Name, inParam).ProcessId);
   package.IconLink.Delete();
   errorLog.Read();
   errorLog.Delete();
@@ -40,14 +40,19 @@ if (param.Set || param.Unset) {
 }
 
 /**
- * Wait for the process exit.
- * @param {number} processId is the process identifier.
+ * Wait for the child process exit.
+ * @param {number} parentProcessId is the parent process identifier.
  */
-function waitForExit(processId) {
-  try {
-    var moniker = 'winmgmts:Win32_Process=' + processId;
-    while (GetObject(moniker)) { }
-  } catch (error) { }
+function waitForChildExit(parentProcessId) {
+  // Select the process whose parent is the intermediate process used for executing the link.
+  var wmiQuery = 'SELECT * FROM Win32_Process WHERE Name="pwsh.exe" AND ParentProcessId=' + parentProcessId;
+  var getProcess = function() {
+    return (new Enumerator(GetObject('winmgmts:').ExecQuery(wmiQuery))).item();
+  }
+  // Wait for the process to start.
+  while (getProcess() == null) { }
+  // Wait for the process to exit.
+  while (getProcess() != null) { }
 }
 
 /**
