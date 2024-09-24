@@ -1,7 +1,7 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.3
+ * @version 0.0.1.4
  */
 
 /** @type {ParamHash} */
@@ -44,15 +44,11 @@ if (param.Set || param.Unset) {
  * @param {number} parentProcessId is the parent process identifier.
  */
 function waitForChildExit(parentProcessId) {
+  // The process termination event query.
   // Select the process whose parent is the intermediate process used for executing the link.
-  var wmiQuery = 'SELECT * FROM Win32_Process WHERE Name="pwsh.exe" AND ParentProcessId=' + parentProcessId;
-  var getProcess = function() {
-    return (new Enumerator(GetObject('winmgmts:').ExecQuery(wmiQuery))).item();
-  }
-  // Wait for the process to start.
-  while (getProcess() == null) { }
+  var wmiQuery = 'SELECT * FROM __InstanceDeletionEvent WITHIN 0.1 WHERE TargetInstance ISA "Win32_Process" AND TargetInstance.Name="pwsh.exe" AND TargetInstance.ParentProcessId=' + parentProcessId;
   // Wait for the process to exit.
-  while (getProcess() != null) { }
+  GetObject('winmgmts:').ExecNotificationQuery(wmiQuery).NextEvent();
 }
 
 /**
