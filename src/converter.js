@@ -1,6 +1,6 @@
 /**
  * @file returns the method to convert from markdown to html.
- * @version 0.0.1.2
+ * @version 0.0.1.3
  */
 
 /**
@@ -25,10 +25,11 @@
   var MARKDOWN_REGEX = /\.md$/i;
 
   /**
+   * @param {string} htmlLibraryPath is the path string of the html loading the library.
    * @param {string} jsLibraryPath is the javascript library path.
    * @returns {object} the Converter type.
    */
-  return function (jsLibraryPath) {
+  return function (htmlLibraryPath, jsLibraryPath) {
     /** @class @constructs MarkdownToHtml */
     function MarkdownToHtml() { }
 
@@ -57,23 +58,7 @@
       // Build the HTML document that will load the showdown.js library.
       var document = new ActiveXObject('htmlFile');
       document.open();
-      document.write(
-        '<!DOCTYPE html>' +
-        '<html>' +
-        '<head>' +
-          '<meta charset="UTF-8" />' +
-          '<meta http-equiv="X-UA-Compatible" content="IE=edge" />' +
-          '<script type="text/javascript">' +
-            GetContent(jsLibraryPath) +
-            'function convertMarkdown(markdownContent){' +
-              'return (new showdown.Converter()).makeHtml(markdownContent);' +
-            '}' +
-          '</script>' +
-        '</head>' +
-        '<body>' +
-        '</body>' +
-        '</html>'
-      );
+      document.write(format(GetContent(htmlLibraryPath), GetContent(jsLibraryPath)));
       document.close();
       return document.parentWindow.convertMarkdown(markdownContent);
     }

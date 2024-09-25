@@ -1,7 +1,7 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.9
+ * @version 0.0.1.10
  */
 
 // Imports.
@@ -24,7 +24,7 @@ if (param.RunLink) {
 }
 
 if (param.Markdown) {
-  include('src/converter.js')(package.JsLibraryPath).ConvertFrom(param.Markdown);
+  include('src/converter.js')(package.HtmlLibraryPath, package.JsLibraryPath).ConvertFrom(param.Markdown);
   WSH.Quit();
 }
 
