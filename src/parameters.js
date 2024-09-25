@@ -1,6 +1,6 @@
 /**
  * @file returns the parsed parameters.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /**
@@ -16,7 +16,7 @@
 /** @module parameters */
 /** @returns {ParamHash|undefined} the parsed input parameters. */
 (function() {
-  var WshArguments = WSH.Arguments;
+  var WshArguments = WScript.Arguments;
   var WshNamed = WshArguments.Named;
   var paramCount = WshArguments.Count();
   if (paramCount == 1) {
@@ -56,6 +56,6 @@
   helpText += '              NoIcon  Specifies that the icon is not configured.\n';
   helpText += '               Unset  Removes the shortcut menu.\n';
   helpText += '                Help  Show the help doc.\n';
-  WSH.Echo(helpText);
-  WSH.Quit();
+  WScript.Echo(helpText);
+  WScript.Quit();
 })();

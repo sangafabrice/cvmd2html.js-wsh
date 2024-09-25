@@ -1,6 +1,6 @@
 /**
  * @file returns the methods for managing the shortcut menu option: install and uninstall.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /** @module setup */
@@ -16,7 +16,7 @@
      */
     Set: function (paramNoIcon, menuIconPath) {
       var COMMAND_KEY = VERB_KEY + '\\command';
-      var command = format('{0} "{1}" /Markdown:"%1"', WSH.FullName.replace(/\\cscript\.exe$/i, '\\wscript.exe'), WSH.ScriptFullName);
+      var command = format('{0} "{1}" /Markdown:"%1"', WScript.FullName.replace(/\\cscript\.exe$/i, '\\wscript.exe'), WScript.ScriptFullName);
       registry.CreateKey(HKCU, COMMAND_KEY);
       registry.SetStringValue(HKCU, COMMAND_KEY, null, command);
       registry.SetStringValue(HKCU, VERB_KEY, null, 'Convert to &HTML');

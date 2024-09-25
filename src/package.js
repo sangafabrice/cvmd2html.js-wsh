@@ -1,7 +1,7 @@
 /**
  * @file returns information about the resource files used by the project.
  * It also provides a way to manage the custom icon link that can be installed and uninstalled.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /**
@@ -22,7 +22,7 @@
   var fs = new ActiveXObject('Scripting.FileSystemObject');
   /** @type {PackageHash} */
   var package = {
-    Root: fs.GetParentFolderName(WSH.ScriptFullName)
+    Root: fs.GetParentFolderName(WScript.ScriptFullName)
   };
   package.ResourcePath = fs.BuildPath(package.Root, 'rsc');
   package.PwshScriptPath = fs.BuildPath(package.ResourcePath, 'cvmd2html.ps1');
@@ -36,7 +36,7 @@
     return registry.ExecMethod_(getStringValueMethod.Name, inParam).sValue;
   })();
   package.IconLink = {
-    DirName: WSH.CreateObject('WScript.Shell').SpecialFolders('StartMenu'),
+    DirName: WScript.CreateObject('WScript.Shell').SpecialFolders('StartMenu'),
     Name: 'cvmd2html.lnk',
     /**
      * Create the custom icon link file.
@@ -44,7 +44,7 @@
      */
     Create: function () {
       fs.CreateTextFile(this.Path).Close();
-      var link = WSH.CreateObject('Shell.Application').NameSpace(this.DirName).ParseName(this.Name).GetLink;
+      var link = WScript.CreateObject('Shell.Application').NameSpace(this.DirName).ParseName(this.Name).GetLink;
       link.Path = package.PwshExePath;
       link.Arguments = format('-ep Bypass -nop -w Hidden -f "{0}" -Markdown', package.PwshScriptPath);
       link.SetIconLocation(package.MenuIconPath, 0);

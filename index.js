@@ -1,7 +1,7 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1
+ * @version 0.0.1.1
  */
 
 /** @type {ParamHash} */
@@ -12,13 +12,13 @@ var package = include('src/package.js');
 /** The application execution. */
 if (param.Markdown) {
   if (!package.IconLink.IsValid()) {
-    WSH.Quit();
+    WScript.Quit();
   }
   var WINDOW_STYLE_HIDDEN = 0xC;
   var startInfo = GetObject('winmgmts:Win32_ProcessStartup').SpawnInstance_();
   startInfo.ShowWindow = WINDOW_STYLE_HIDDEN;
   GetObject('winmgmts:Win32_Process').Create(format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" "{1}""', package.IconLink.Path, param.Markdown), null, startInfo);
-  WSH.Quit();
+  WScript.Quit();
 }
 
 /** Configuration and settings. */
@@ -56,7 +56,7 @@ function include(libraryPath) {
   var fs = new ActiveXObject('Scripting.FileSystemObject');
   var FOR_READING = 1;
   try {
-    with(fs.OpenTextFile(fs.BuildPath(fs.GetParentFolderName(WSH.ScriptFullName), libraryPath), FOR_READING)) {
+    with(fs.OpenTextFile(fs.BuildPath(fs.GetParentFolderName(WScript.ScriptFullName), libraryPath), FOR_READING)) {
       var content = ReadAll();
       Close();
     }
