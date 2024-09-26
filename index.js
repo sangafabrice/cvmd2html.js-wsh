@@ -1,7 +1,7 @@
 /**
  * @file Launches the shortcut target PowerShell script with the selected markdown as an argument.
  * It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
- * @version 0.0.1.4
+ * @version 0.0.1.5
  */
 
 /** @type {ParamHash} */
@@ -22,6 +22,7 @@ if (param.Markdown) {
   inParam.CommandLine = format('C:\\Windows\\System32\\cmd.exe /d /c ""{0}" 2> "{1}""', package.IconLink.Path, errorLog.Path);
   inParam.ProcessStartupInformation = startInfo;
   package.IconLink.Create(param.Markdown);
+  var sink = WSH.CreateObject('WbemScripting.SWbemSink', 'PwshProcess_');
   waitForChildExit(processService.ExecMethod_(createMethod.Name, inParam).ProcessId);
   package.IconLink.Delete();
   errorLog.Read();
@@ -48,7 +49,32 @@ function waitForChildExit(parentProcessId) {
   // Select the process whose parent is the intermediate process used for executing the link.
   var wmiQuery = 'SELECT * FROM __InstanceDeletionEvent WITHIN 0.1 WHERE TargetInstance ISA "Win32_Process" AND TargetInstance.Name="pwsh.exe" AND TargetInstance.ParentProcessId=' + parentProcessId;
   // Wait for the process to exit.
-  GetObject('winmgmts:').ExecNotificationQuery(wmiQuery).NextEvent();
+  GetObject('winmgmts:').ExecNotificationQueryAsync(sink, wmiQuery);
+  while (sink) {
+    WSH.Sleep(1);
+  }
+}
+
+/** Expected to be called when the child process exits. */
+function PwshProcess_OnObjectReady(wbemObject, asyncContext) {
+  wbemObject = null;
+  asyncContext = null;
+  sink.Cancel();
+  sink = null;
+}
+
+/** Expected to be called when objSink.Cancel is called. */
+function PwshProcess_OnCompleted(hResult, wbemObject, asyncContext) {
+  // If the HRresult message is not WBEM_E_CALL_CANCELLED.
+  if (hResult == 0x80041032 | 0x100000000) {
+    var OKONLY_BUTTON = 0;
+    var ERROR_ICON = 16;
+    var NO_TIMEOUT = 0;
+    WSH.CreateObject('WScript.Shell').Popup('An unhandled exception occured.', NO_TIMEOUT, 'Convert to HTML', OKONLY_BUTTON + ERROR_ICON)
+  }
+  wbemObject = null;
+  asyncContext = null;
+  sink = null;
 }
 
 /**
