@@ -1,7 +1,7 @@
 /**
  * @file returns information about the resource files used by the project.
  * It also provides a way to manage the custom icon link that can be installed and uninstalled.
- * @version 0.0.1.11
+ * @version 0.0.1.12
  */
 
 /**
@@ -10,7 +10,6 @@
  * @property {string} ResourcePath is the project resources directory path.
  * @property {string} MenuIconPath is the shortcut menu icon path.
  * @property {string} HtmlLibraryPath is the html file that embeds the JS library path.
- * @property {string} JsLibraryPath is the showdown.js library path.
  * @property {object} IconLink represents an adapted link object.
  * @property {string} IconLink.DirName is the parent directory path of the custom icon link.
  * @property {string} IconLink.Name is the custom icon link file name.
@@ -25,7 +24,6 @@
   };
   package.ResourcePath = fs.BuildPath(package.Root, 'rsc');
   package.HtmlLibraryPath = fs.BuildPath(package.ResourcePath, 'showdown.html');
-  package.JsLibraryPath = fs.BuildPath(package.ResourcePath, 'showdown.min.js');
   package.MenuIconPath = fs.BuildPath(package.ResourcePath, 'menu.ico');
   package.IconLink = {
     DirName: wshell.ExpandEnvironmentStrings('%TEMP%'),

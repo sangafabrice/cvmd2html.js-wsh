@@ -1,6 +1,6 @@
 /**
  * @file returns the method to convert from markdown to html.
- * @version 0.0.1.4
+ * @version 0.0.1.5
  */
 
 /**
@@ -26,10 +26,9 @@
 
   /**
    * @param {string} htmlLibraryPath is the path string of the html loading the library.
-   * @param {string} jsLibraryPath is the javascript library path.
    * @returns {object} the Converter type.
    */
-  return function (htmlLibraryPath, jsLibraryPath) {
+  return function (htmlLibraryPath) {
     /** @class @constructs MarkdownToHtml */
     function MarkdownToHtml() { }
 
@@ -58,7 +57,7 @@
       // Build the HTML document that will load the showdown.js library.
       var document = new ActiveXObject('htmlFile');
       document.open();
-      document.write(format(GetContent(htmlLibraryPath), jsLibraryPath));
+      document.write(GetContent(htmlLibraryPath));
       document.close();
       while (!document.parentWindow.showdown) {
         WSH.Sleep(1); 
