@@ -1,6 +1,6 @@
 /**
  * @file returns the parsed parameters.
- * @version 0.0.1.2
+ * @version 0.0.1.3
  */
 
 /**
@@ -19,8 +19,13 @@
 (function() {
   var WshArguments = WSH.Arguments;
   var WshNamed = WshArguments.Named;
+  var WshUnNamed = WshArguments.UnNamed;
   var paramCount = WshArguments.Count();
-  var paramMarkdown = WshNamed('Markdown');
+  var unnamedParamCount = WshUnNamed.length;
+  var paramMarkdown = '';
+  if (unnamedParamCount == 1) {
+    var paramMarkdown = WshUnNamed(0);
+  }
   if (paramCount == 2 && WshNamed('RunLink') == undefined && WshNamed.Exists('RunLink') && paramMarkdown.length) {
     return {
       Markdown: paramMarkdown,
@@ -28,7 +33,7 @@
     }
   }
   if (paramCount == 1) {
-    if (WshNamed.Exists('Markdown') && paramMarkdown != undefined && paramMarkdown.length) {
+    if (paramMarkdown.length) {
       return { Markdown: paramMarkdown };
     }
     var param = { Set: WshNamed.Exists('Set') };
@@ -54,7 +59,7 @@
   helpText += 'The MarkdownToHtml shortcut launcher.\n';
   helpText += 'It starts the shortcut menu target script in a hidden window.\n\n';
   helpText += 'Syntax:\n';
-  helpText += '  Convert-MarkdownToHtml.js /Markdown:<markdown file path>\n';
+  helpText += '  Convert-MarkdownToHtml.js <markdown file path>\n';
   helpText += '  Convert-MarkdownToHtml.js [/Set[:NoIcon]]\n';
   helpText += '  Convert-MarkdownToHtml.js /Unset\n';
   helpText += '  Convert-MarkdownToHtml.js /Help\n\n';
