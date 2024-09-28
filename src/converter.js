@@ -1,6 +1,6 @@
 /**
  * @file returns the method to convert from markdown to html.
- * @version 0.0.1.3
+ * @version 0.0.1.4
  */
 
 /**
@@ -58,8 +58,11 @@
       // Build the HTML document that will load the showdown.js library.
       var document = new ActiveXObject('htmlFile');
       document.open();
-      document.write(format(GetContent(htmlLibraryPath), GetContent(jsLibraryPath)));
+      document.write(format(GetContent(htmlLibraryPath), jsLibraryPath));
       document.close();
+      while (!document.parentWindow.showdown) {
+        WSH.Sleep(1); 
+      }
       return document.parentWindow.convertMarkdown(markdownContent);
     }
 
